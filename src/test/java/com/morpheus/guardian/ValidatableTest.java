@@ -1,10 +1,7 @@
 package com.morpheus.guardian;
 
-import com.morpheus.guardian.core.ErrorMatcher;
-import com.morpheus.guardian.core.Validatable;
 import com.morpheus.guardian.core.Validator;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,8 +15,8 @@ import static com.morpheus.guardian.dsl.DSL.from;
 import static com.morpheus.guardian.expressions.JsonPathAddressable.jpath;
 import static com.morpheus.guardian.validators.Is.is;
 import static com.morpheus.guardian.validators.IsEqual.eq;
-import static com.morpheus.guardian.validators.Not.not;
 import static com.morpheus.guardian.validators.IsNull.nil;
+import static com.morpheus.guardian.validators.Not.not;
 import static org.junit.Assert.assertThat;
 
 public class ValidatableTest {
@@ -63,6 +60,11 @@ public class ValidatableTest {
                 .should(
                         validatable -> validatable.nested(jpath("$.inexistent")).should(nil())
                 ), errors());
+
+        assertThat(from(context)
+                .should(
+                        validatable -> validatable.nested(jpath("$.inexistent")).should(eq("value"))
+                ), errors(error("value")));
     }
 
     @Test

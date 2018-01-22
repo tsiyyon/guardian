@@ -4,6 +4,8 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
+import java.util.List;
+
 import static org.hamcrest.core.AllOf.allOf;
 
 public class ErrorMatcher<T> extends BaseMatcher<T> {
@@ -18,22 +20,25 @@ public class ErrorMatcher<T> extends BaseMatcher<T> {
     }
 
     @SafeVarargs
-    public static <T> Matcher<T> errors(Matcher<T> ...errors) {
-        if (errors.length == 0) {
-            return new BaseMatcher<T>() {
-                @Override
-                public boolean matches(Object item) {
-                    return true;
+    public static <T> Matcher<T> errors(Matcher<T>... errors) {
+        return new BaseMatcher<T>() {
+            @Override
+            public boolean matches(Object item) {
+                if ((item instanceof List)) {
+                    // TODO: should match the errors matcher
+                    // return allOf(errors);
+                    return errors.length == ((List) item).size();
                 }
+                return false;
 
-                @Override
-                public void describeTo(Description description) {
+            }
 
-                }
-            };
-        }
+            @Override
+            public void describeTo(Description description) {
 
-        return allOf(errors);
+            }
+        };
+
     }
 
     @Override
