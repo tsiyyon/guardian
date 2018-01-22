@@ -1,8 +1,10 @@
 package com.morpheus.guardian;
 
+import com.morpheus.guardian.core.ErrorMatcher;
 import com.morpheus.guardian.core.Validatable;
 import com.morpheus.guardian.core.Validator;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.morpheus.guardian.core.ErrorMatcher.error;
+import static com.morpheus.guardian.core.ErrorMatcher.errors;
 import static com.morpheus.guardian.dsl.DSL.from;
 import static com.morpheus.guardian.expressions.JsonPathAddressable.jpath;
 import static com.morpheus.guardian.validators.Is.is;
@@ -50,15 +54,15 @@ public class ValidatableTest {
     public void should_able_to_get_the_field_and_validated() {
         context.put("test", "test");
 
-        List<Validator.Error> empty = from(context).should(new Validator<Object>() {
-            @Override
-            public List<Error> validate(Validatable<Object> validatable) {
-                Validatable<Object> test = validatable.nested(jpath("$.test"));
-                return test.should(eq("test"));
-            }
-        });
+        assertThat(from(context)
+                .should(
+                        validatable -> validatable.nested(jpath("$.test")).should(eq("test"))
+                ), errors());
 
-        assertThat(empty.size(), CoreMatchers.is(0));
+        assertThat(from(context)
+                .should(
+                        validatable -> validatable.nested(jpath("$.inexistent")).should(nil())
+                ), errors());
     }
 
     @Test
