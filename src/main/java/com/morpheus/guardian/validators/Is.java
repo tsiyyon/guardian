@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.morpheus.guardian.validators.IsEqual.eq;
+
 public class Is<T> implements Validator<T> {
 
     private Validator<T> validator;
 
-    public Is(Validator<T> validator) {
+    private Is(Validator<T> validator) {
         this.validator = validator;
     }
 
@@ -20,18 +22,11 @@ public class Is<T> implements Validator<T> {
     }
 
     public static <T> Validator<T> is(T value) {
-        return is(IsEqual.equalTo(value));
+        return is(eq(value));
     }
 
     @Override
     public List<Error> validate(Validatable<T> validatable) {
-        T actual = validatable.value();
-
-        if (actual == null) {
-            return Collections.emptyList();
-        } else {
-            ArrayList<Error> errors = new ArrayList<>();
-            return errors;
-        }
+        return validator.validate(validatable);
     }
 }

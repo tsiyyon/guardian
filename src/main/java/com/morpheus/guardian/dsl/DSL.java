@@ -15,6 +15,10 @@ public class DSL<T> implements com.morpheus.guardian.core.DSL<T> {
     }
 
     public static <T> com.morpheus.guardian.core.DSL<T> from(Object context) {
+        if (context == null) {
+            return new Nil<>(new Validatable<T>(context, context1 -> null));
+        }
+
         return new DSL<>(context);
     }
 
@@ -36,7 +40,7 @@ public class DSL<T> implements com.morpheus.guardian.core.DSL<T> {
 
     @Override
     public List<Validator.Error> should(Validator<T> validator) {
-        return validator.validate(new Validatable<>(context, context -> null));
+        return validator.validate(new Validatable<>(context, context -> (T) context));
     }
 
     public class Filter<S> implements com.morpheus.guardian.core.DSL.Filter<S> {

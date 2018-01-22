@@ -1,38 +1,36 @@
 package com.morpheus.guardian.dsl;
 
-import com.morpheus.guardian.core.*;
+import com.morpheus.guardian.core.Validator;
 
 import java.util.List;
-import java.util.Map;
 
 public class Validatable<T> implements com.morpheus.guardian.core.Validatable<T> {
     private Object context;
-    private Expression<T> expression;
+    private Addressable<T> addressable;
     private String filter;
     private String name;
 
-    private Validatable(Object context, String filter) {
+    public Validatable(Object context, Addressable<T> addressable) {
         this.context = context;
-        this.filter = filter;
-        this.name = filter.replaceAll(".", "");
-    }
-
-    public Validatable(Object context, Expression<T> expression) {
-        this.context = context;
-        this.expression = expression;
-    }
-
-    @Override
-    public Validatable<T> field(String expression) {
-        return new Validatable<>(context, expression);
+        this.addressable = addressable;
     }
 
     @Override
     public T value() {
-        if (Map.class.isAssignableFrom(context.getClass())) {
-            return (T) ((Map) context).get("filter");
+        if (context == null) {
+            return null;
         }
-        return null;
+
+        if (addressable == null) {
+            return (T) context;
+        }
+
+        return addressable.locate(context);
+    }
+
+    @Override
+    public <R> com.morpheus.guardian.core.Validatable<R> nested(Addressable<R> addressable) {
+        return new Validatable<>(context, addressable);
     }
 
     String pointer() {
@@ -46,9 +44,5 @@ public class Validatable<T> implements com.morpheus.guardian.core.Validatable<T>
     @Override
     public List<Validator.Error> should(Validator<T> validator) {
         return validator.validate(this);
-    }
-
-    public interface Expression<R> {
-        R applied(Object context);
     }
 }

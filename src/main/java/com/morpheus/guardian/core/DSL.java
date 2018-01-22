@@ -1,5 +1,6 @@
 package com.morpheus.guardian.core;
 
+import com.morpheus.guardian.dsl.Validatable;
 import org.hamcrest.Matcher;
 
 import java.util.List;
@@ -45,5 +46,29 @@ public interface DSL<T> {
         Matcher<T> eq(T t);
 
         Matcher<T> and(Matcher<T>... matchers);
+    }
+
+    class Nil<T> implements DSL<T> {
+
+        private final Validatable<T> validatable;
+
+        public Nil(Validatable<T> validatable) {
+            this.validatable = validatable;
+        }
+
+        @Override
+        public <S> Select<S> select(Consumer<Selector<S>> selector) {
+            throw new RuntimeException();
+        }
+
+        @Override
+        public <S> Where<S> where(Consumer<Filter<S>> filter) {
+            throw new RuntimeException();
+        }
+
+        @Override
+        public List<Validator.Error> should(Validator<T> validator) {
+            return validator.validate(validatable);
+        }
     }
 }

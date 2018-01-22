@@ -7,10 +7,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.morpheus.guardian.validators.Not.not;
+
+
 public class IsNull<T> implements Validator<T> {
 
-    public static <T> Validator<T> isNull() {
+    public static <T> Validator<T> nil() {
         return new IsNull<>();
+    }
+
+    public static <T> Validator<T> notNil() {
+        return not(nil());
     }
 
     @Override
@@ -21,6 +28,7 @@ public class IsNull<T> implements Validator<T> {
             return Collections.emptyList();
         } else {
             ArrayList<Error> errors = new ArrayList<>();
+            errors.add(new Error());
             return errors;
         }
     }

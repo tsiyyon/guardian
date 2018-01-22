@@ -8,11 +8,13 @@ ext {
     hamcrest = '1.3'
     slf4j = '1.7.25'
     junit = '4.12'
+    json_path = '2.2.0'
 }
 
 dependencies {
     compile "org.slf4j:slf4j-api:$slf4j"
     compile "org.hamcrest:hamcrest-core:$hamcrest"
+    compile "com.jayway.jsonpath:json-path:$json_path"
 
     testCompile "junit:junit:$junit"
 }
