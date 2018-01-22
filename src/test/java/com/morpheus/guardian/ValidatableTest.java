@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.morpheus.guardian.dsl.Validatable.from;
+import static com.morpheus.guardian.dsl.DSL.from;
 import static com.morpheus.guardian.validators.IsNull.isNull;
 
 public class ValidatableTest {

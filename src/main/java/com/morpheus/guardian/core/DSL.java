@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 public interface DSL<T> {
     <S> Select<S> select(Consumer<Selector<S>> selector);
 
-    <S> Where<S> where(Consumer<Wherer<S>> wherer);
+    <S> Where<S> where(Consumer<Filter<S>> filter);
 
     List<Validator.Error> should(Validator<T> validator);
 
@@ -19,28 +19,31 @@ public interface DSL<T> {
     interface Select<T> {
         List<Validator.Error> should(Validator<T> validator);
 
+        T value();
+
         interface Selector<T> {
             T apply(Object context);
         }
     }
 
-    interface Wherer<S> {
+    interface Filter<S> {
         MatcherBuilder<S> path(String path);
 
-        interface MatcherBuilder<T> {
-            Matcher<T> is(T t);
-
-            Matcher<T> not(T t);
-
-            Matcher<T> eq(T t);
-
-            Matcher<T> and(Matcher<T>... matchers);
-        }
     }
 
     interface Where<S> {
         <S> Select<S> select(Consumer<Selector<S>> builder);
 
         List<Validator.Error> should(Validator<S> validator);
+    }
+
+    interface MatcherBuilder<T> {
+        Matcher<T> is(T t);
+
+        Matcher<T> not(T t);
+
+        Matcher<T> eq(T t);
+
+        Matcher<T> and(Matcher<T>... matchers);
     }
 }
