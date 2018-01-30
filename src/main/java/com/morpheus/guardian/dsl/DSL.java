@@ -1,11 +1,14 @@
 package com.morpheus.guardian.dsl;
 
 import com.morpheus.guardian.core.Validator;
+import com.morpheus.guardian.expressions.JsonPathAddressable;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 
 import java.util.List;
 import java.util.function.Consumer;
+
+import static com.morpheus.guardian.expressions.JsonPathAddressable.jpath;
 
 public class DSL<T> implements com.morpheus.guardian.core.DSL<T> {
     private Object context;
@@ -23,19 +26,19 @@ public class DSL<T> implements com.morpheus.guardian.core.DSL<T> {
     }
 
     @Override
-    public <S> com.morpheus.guardian.core.DSL.Select<S> select(Consumer<com.morpheus.guardian.core.DSL.Selector<S>> selector) {
-        Selector<S> selectorBuilder = new Selector<>(context);
-        selector.accept(selectorBuilder);
+    public <S> com.morpheus.guardian.core.DSL.Select<S> select(Consumer<com.morpheus.guardian.core.DSL.Selector<S>> consumer) {
+        Selector<S> selector = new Selector<>(context);
+        consumer.accept(selector);
 
-        return new Select<>(context, selectorBuilder.build());
+        return new Select<>(context, selector.build());
     }
 
     @Override
-    public <S> com.morpheus.guardian.core.DSL.Where<S> where(Consumer<com.morpheus.guardian.core.DSL.Filter<S>> filter) {
-        Filter<S> t = new Filter<>(context);
-        filter.accept(t);
+    public <S> com.morpheus.guardian.core.DSL.Where<S> where(Consumer<com.morpheus.guardian.core.DSL.Filter<S>> consumer) {
+        Filter<S> filter = new Filter<>(context);
+        consumer.accept(filter);
 
-        return new Where<>(context, t.build());
+        return new Where<>(context, filter.build());
     }
 
     @Override
@@ -44,8 +47,10 @@ public class DSL<T> implements com.morpheus.guardian.core.DSL<T> {
     }
 
     public class Filter<S> implements com.morpheus.guardian.core.DSL.Filter<S> {
-        public Filter(Object context) {
+        private Object context;
 
+        public Filter(Object context) {
+            this.context = context;
         }
 
         private Matcher<S> build() {
@@ -54,66 +59,80 @@ public class DSL<T> implements com.morpheus.guardian.core.DSL<T> {
 
         @Override
         public com.morpheus.guardian.core.DSL.MatcherBuilder<S> path(String path) {
-            return new MatcherBuilder<>();
+            return new MatcherBuilder<>(path);
         }
-
     }
 
     public class Where<S> implements com.morpheus.guardian.core.DSL.Where<S> {
+        private final Object context;
+        private final Matcher<S> matcher;
+
         public Where(Object context, Matcher<S> matcher) {
+            this.context = context;
+            this.matcher = matcher;
         }
 
 
         @Override
-        public <S> com.morpheus.guardian.core.DSL.Select<S> select(Consumer<com.morpheus.guardian.core.DSL.Selector<S>> builder) {
-            Selector<S> s1SelectorBuilder = new Selector<>(context);
-            builder.accept(s1SelectorBuilder);
+        public <S> com.morpheus.guardian.core.DSL.Select<S> select(Consumer<com.morpheus.guardian.core.DSL.Selector<S>> consumer) {
+            Selector<S> selector = new Selector<>(context);
+            consumer.accept(selector);
 
-            return new Select<>(context, s1SelectorBuilder.build());
+            return new Select<>(context, selector.build());
         }
 
         @Override
         public List<Validator.Error> should(Validator<S> validator) {
+            // should find field that matched matcher
+            // should all the matched field matched the validator
             return null;
         }
     }
 
     public static class Select<T> implements com.morpheus.guardian.core.DSL.Select<T> {
         private final Object context;
-        private final Selector<T> value;
+        private final Selector<T> selector;
 
-        public Select(Object context, Selector<T> value) {
+        public Select(Object context, Selector<T> selector) {
             this.context = context;
-            this.value = value;
+            this.selector = selector;
         }
 
         @Override
         public List<Validator.Error> should(Validator<T> validator) {
-            return validator.validate(new Validatable<>(context, context -> null));
+            return validator.validate(new Validatable<>(context, selector::apply));
         }
 
         @Override
         public T value() {
-            return null;
+            return selector.apply(context);
         }
     }
 
     public static class Selector<S> implements com.morpheus.guardian.core.DSL.Selector<S> {
-        public Selector(Object context) {
+        private Object context;
+        private String path;
 
+        public Selector(Object context) {
+            this.context = context;
         }
 
         @Override
-        public <T> com.morpheus.guardian.core.DSL.Select.Selector<T> path(String path) {
-            return context -> null;
+        public com.morpheus.guardian.core.DSL.Selector<S> path(String path) {
+            this.path = path;
+            return this;
         }
 
         private com.morpheus.guardian.core.DSL.Select.Selector<S> build() {
-            return null;
+            return JsonPathAddressable.<S>jpath(path)::locate;
         }
     }
 
     public class MatcherBuilder<T> implements com.morpheus.guardian.core.DSL.MatcherBuilder<T> {
+        public MatcherBuilder(String path) {
+
+        }
+
         @Override
         public Matcher<T> is(T t) {
             return CoreMatchers.is(t);

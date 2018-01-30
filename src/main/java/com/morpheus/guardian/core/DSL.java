@@ -14,7 +14,7 @@ public interface DSL<T> {
     List<Validator.Error> should(Validator<T> validator);
 
     interface Selector<T> {
-        <T> Select.Selector<T> path(String path);
+        Selector<T> path(String path);
     }
 
     interface Select<T> {
@@ -29,7 +29,6 @@ public interface DSL<T> {
 
     interface Filter<S> {
         MatcherBuilder<S> path(String path);
-
     }
 
     interface Where<S> {

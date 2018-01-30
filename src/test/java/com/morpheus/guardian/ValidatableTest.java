@@ -67,12 +67,4 @@ public class ValidatableTest {
                 ), errors(error("value")));
     }
 
-    @Test
-    public void should_use_dsl() {
-        from(context).select(c -> c.path("test")).should(nil());
-        from(context).where(c -> c.path("test").is("test")).should(nil());
-        from(context).where(c -> c.path("test").is("test")).select(s -> s.path("xxx")).should(nil());
-        from(context).where(c -> c.path("test").eq("test")).select(s -> s.path("xxx")).should(nil());
-        from(context).where(c -> c.path("test").not("test")).select(s -> s.path("xxx")).should(nil());
-    }
 }
